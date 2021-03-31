@@ -94,8 +94,8 @@ class User(metaclass=abc.ABCMeta):
         self.email = data.get("email")
         self.service_email = data.get("serviceEmail")
         self.games = data.get("aliases", [])
-        self.bio = data.get("aboutInfo", {}).get("bio", "")
-        self.tagline = data.get("aboutInfo", {}).get("tagLine", "")
+        self.bio = (data.get("aboutInfo") or {}).get("bio", "")
+        self.tagline = (data.get("aboutInfo") or {}).get("tagLine", "")
         activity = data.get("userStatus", {})
         if activity.get("content"):
             self.activity = Activity.build(activity["content"])
