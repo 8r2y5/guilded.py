@@ -2,5 +2,6 @@ guilded.py.egg-info/
 guilded.py_shay.egg-info/
 dist/
 build/
-guilded/__pycache__/
+__pycache__/
 testing/
+.idea
