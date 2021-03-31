@@ -1,15 +1,18 @@
-import datetime
 import asyncio
+import datetime
 
-from .errors import *
-from .user import Member
+from .abc import TeamChannel
 from .asset import Asset
-from .utils import ISO8601
-from guilded.abc import TeamChannel
 from .channel import ChatChannel, Thread
+from .errors import NotFound
+from .gateway import GuildedWebSocket
+from .user import Member
+from .utils import ISO8601
+
 
 class SocialInfo:
-    '''Represents the set social media connections for a :class:`Team`.'''
+    """Represents the set social media connections for a :class:`Team`."""
+
     def __init__(self, **fields):
         self.twitter = None
         self.facebook = None
@@ -17,61 +20,73 @@ class SocialInfo:
         self.twitch = None
 
         for social, name in fields.items():
-            # set dynamically so as to futureproof new social 
+            # set dynamically so as to futureproof new social
             # media connections being available
             setattr(self, social, name)
+
 
 class TeamTimezone(datetime.tzinfo):
     # todo, lol
     pass
 
+
 class Team:
-    '''Represents a team (or "server") in Guilded.'''
+    """Represents a team (or "server") in Guilded."""
+
     def __init__(self, *, state, data, ws=None):
         self._state = state
         self.ws = ws
-        data = data.get('team', data)
+        data = data.get("team", data)
 
-        self.id = data.get('id')
-        self.owner_id = data.get('ownerId')
-        self.name = data.get('name')
-        self.subdomain = data.get('subdomain')
-        self.created_at = ISO8601(data.get('createdAt'))
-        self.bio = data.get('bio') or ''
-        self.description = data.get('description') or ''
-        self.discord_guild_id = data.get('discordGuildId')
-        self.discord_guild_name = data.get('discordServerName')
-        self.socials = SocialInfo(**data.get('socialInfo', {}))
-        self.timezone = data.get('timezone') # TeamTimezone(data.get('timezone'))
+        self.id = data.get("id")
+        self.owner_id = data.get("ownerId")
+        self.name = data.get("name")
+        self.subdomain = data.get("subdomain")
+        self.created_at = ISO8601(data.get("createdAt"))
+        self.bio = data.get("bio") or ""
+        self.description = data.get("description") or ""
+        self.discord_guild_id = data.get("discordGuildId")
+        self.discord_guild_name = data.get("discordServerName")
+        self.socials = SocialInfo(**data.get("socialInfo", {}))
+        self.timezone = data.get(
+            "timezone"
+        )  # TeamTimezone(data.get('timezone'))
 
-        for member in data.get('members', []):
+        for member in data.get("members", []):
             self._state.add_to_member_cache(
-                self.state._get_team_member(self.id, member.get('id')) or Member(state=self._state, data=member)
+                self.state._get_team_member(self.id, member.get("id"))
+                or Member(state=self._state, data=member)
             )
-        #self.members = data.get('members', [])
-        self.bots = data.get('bots', [])
-        self.channels = data.get('channels', [])
+        # self.members = data.get('members', [])
+        self.bots = data.get("bots", [])
+        self.channels = data.get("channels", [])
 
-        self.recruiting = data.get('isRecruiting', False)
-        self.verified = data.get('isVerified', False)
-        self.public = data.get('isPublic', False)
-        self.pro = data.get('isPro', False)
-        self.user_is_applicant = data.get('isUserApplicant', False)
-        self.user_is_invited = data.get('isUserInvited', False)
-        self.user_is_banned = data.get('isUserBannedFromTeam', False)
-        self.user_is_following = data.get('userFollowsTeam', False)
+        self.recruiting = data.get("isRecruiting", False)
+        self.verified = data.get("isVerified", False)
+        self.public = data.get("isPublic", False)
+        self.pro = data.get("isPro", False)
+        self.user_is_applicant = data.get("isUserApplicant", False)
+        self.user_is_invited = data.get("isUserInvited", False)
+        self.user_is_banned = data.get("isUserBannedFromTeam", False)
+        self.user_is_following = data.get("userFollowsTeam", False)
 
-        self.icon_url = Asset('profilePicture', state=self._state, data=data)
-        self.banner_url = Asset('homeBannerImage', state=self._state, data=data)
+        self.icon_url = Asset("profilePicture", state=self._state, data=data)
+        self.banner_url = Asset(
+            "homeBannerImage", state=self._state, data=data
+        )
 
-        self._follower_count = data.get('followerCount') or 0
-        self._member_count = data.get('memberCount') or data.get('measurements', {}).get('numMembers') or 0
+        self._follower_count = data.get("followerCount") or 0
+        self._member_count = (
+            data.get("memberCount")
+            or data.get("measurements", {}).get("numMembers")
+            or 0
+        )
 
     def __str__(self):
         return self.name
 
     def __repr__(self):
-        return f'<Team id={self.id} name={self.name}>'
+        return f"<Team id={self.id} name={self.name}>"
 
     @property
     def slug(self):
@@ -80,7 +95,11 @@ class Team:
 
     @property
     def vanity_url(self):
-        return f'https://guilded.gg/{self.subdomain}' if self.subdomain is not None else None
+        return (
+            f"https://guilded.gg/{self.subdomain}"
+            if self.subdomain is not None
+            else None
+        )
 
     @property
     def member_count(self):
@@ -93,7 +112,9 @@ class Team:
 
     @property
     def owner(self):
-        return self.get_member(self.owner_id) or self._state._get_user(self.owner_id)
+        return self.get_member(self.owner_id) or self._state._get_user(
+            self.owner_id
+        )
 
     @property
     def me(self):
@@ -107,21 +128,25 @@ class Team:
         return self._state._get_team_member(self.id, id)
 
     async def ws_connect(self, client):
-        '''Connect to the team's websocket.'''
+        """Connect to the team's websocket."""
         if self.ws is None:
-            team_ws_build = GuildedWebSocket.build(client, loop=client.loop, teamId=self.id)
+            team_ws_build = GuildedWebSocket.build(
+                client, loop=client.loop, teamId=self.id
+            )
             self.ws = await asyncio.wait_for(team_ws_build, timeout=60)
 
     async def delete(self):
-        '''Delete the team. You must be the team owner to do this.'''
+        """Delete the team. You must be the team owner to do this."""
         return await self._state.delete_team(self.id)
 
     async def leave(self):
-        '''Leave the team.'''
+        """Leave the team."""
         return await self._state.leave_team(self.id)
 
-    async def create_chat_channel(self, *, name: str, category=None, public=False, group=None):
-        '''Create a new chat (text) channel in the team.
+    async def create_chat_channel(
+        self, *, name: str, category=None, public=False, group=None
+    ):
+        """Create a new chat (text) channel in the team.
 
         Parameters
         ==========
@@ -137,26 +162,26 @@ class Team:
         Returns
         =======
         :class:`ChatChannel`
-        '''
+        """
 
         return await self._state.create_team_channel(
-            type='chat',
-            team_id=self.id, 
+            type="chat",
+            team_id=self.id,
             group_id=group.id if group is not None else self.base_group.id,
             category_id=category.id if category is not None else None,
             name=name,
-            public=public
+            public=public,
         )
 
     async def fetch_channels(self):
-        '''Fetch the list of :class:`TeamChannel`s in this team.'''
+        """Fetch the list of :class:`TeamChannel`s in this team."""
         channels = await self._state.get_team_channels(self.id)
         channel_list = []
-        data = {'state': self._state, 'group': None, 'team': self}
-        for channel in channels.get('channels', []):
-            data = {**data, 'data': channel}
+        data = {"state": self._state, "group": None, "team": self}
+        for channel in channels.get("channels", []):
+            data = {**data, "data": channel}
             try:
-                if channel.get('contentType') == 'chat':
+                if channel.get("contentType") == "chat":
                     channel_obj = ChatChannel(**data)
                 else:
                     channel_obj = TeamChannel(**data)
@@ -165,8 +190,8 @@ class Team:
             else:
                 channel_list.append(channel_obj)
 
-        for channel in channels.get('temporalChannels', []):
-            data = {**data, 'data': channel}
+        for channel in channels.get("temporalChannels", []):
+            data = {**data, "data": channel}
             try:
                 channel_obj = Thread(**data)
             except:
@@ -174,7 +199,7 @@ class Team:
             else:
                 channel_list.append(channel_obj)
 
-        #for channel in channels.get('categories', []):
+        # for channel in channels.get('categories', []):
         #    data = {**data, 'data': channel}
         #    try:
         #        channel_obj = ChannelCategory(**data)
@@ -185,7 +210,7 @@ class Team:
 
         return channel_list
 
-    async def fetch_channel(id):
+    async def fetch_channel(self, id):
         channels = await self.fetch_channels()
         for channel in channels:
             if channel.id == id:
@@ -194,10 +219,10 @@ class Team:
         raise NotFound(id)
 
     async def fetch_members(self):
-        '''Fetch the list of :class:Member s in this team.'''
+        """Fetch the list of :class:Member s in this team."""
         members = await self._state.get_team_members(self.id)
         member_list = []
-        for member in members.get('members', members):
+        for member in members.get("members", members):
             try:
                 member_obj = Member(state=self._state, data=member, team=self)
             except:
@@ -208,13 +233,13 @@ class Team:
         return member_list
 
     async def fetch_member(self, id: str):
-        '''Fetch a specific :class:Member in this team. Guilded does not actually have an endpoint \
+        """Fetch a specific :class:Member in this team. Guilded does not actually have an endpoint \
         for this, so it is no more efficient than performing :class:Team.fetch_members and filtering \
-        the list yourself, and exists solely for convenience.'''
+        the list yourself, and exists solely for convenience."""
         members = await self._state.get_team_members(self.id)
         member_list = []
-        for member in members.get('members', members):
-            if member['id'] == id:
+        for member in members.get("members", members):
+            if member["id"] == id:
                 return Member(state=self._state, data=member)
 
         raise NotFound(f'Member with the ID "{id}" not found.')
@@ -223,10 +248,10 @@ class Team:
         return self.get_member(id) or await self.fetch_member(id)
 
     async def create_invite(self):
-        '''Create an invite to this team.
+        """Create an invite to this team.
 
         Returns
             :class:`str` - the invite code that was created
-        '''
+        """
         invite = await self._state.create_team_invite(self.id)
-        return invite.get('invite', invite).get('id')
+        return invite.get("invite", invite).get("id")
