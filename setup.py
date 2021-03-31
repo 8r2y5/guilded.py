@@ -7,13 +7,7 @@ requirements = []
 with open('requirements.txt') as rtxt:
     requirements = rtxt.read().splitlines()
 
-version = ''
-with open('guilded/__init__.py') as initpy:
-    version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
-
-if not version:
-    raise RuntimeError('Version is not set.')
-
+version = '0.6.1'
 setuptools.setup(
     name='guilded.py',
     version=version,
