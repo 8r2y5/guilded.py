@@ -1,5 +1,4 @@
-guilded.py.egg-info/
-guilded.py_shay.egg-info/
+*.egg-info
 dist/
 build/
 __pycache__/
