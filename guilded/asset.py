@@ -1,9 +1,6 @@
 class Asset:
-    FRIENDLY = {
-        'sm': 'small',
-        'md': 'medium',
-        'lg': 'large'
-    }
+    FRIENDLY = {"sm": "small", "md": "medium", "lg": "large"}
+
     def __init__(self, type, *, state, data):
         self._state = state
         self.type = type
@@ -11,11 +8,27 @@ class Asset:
         self.url = data.get(self.type)
         for key, value in data.items():
             if key.startswith(self.type):
-                fmt = key.replace(self.type, '', 1)
-                setattr(self, self.FRIENDLY.get(fmt.lower(), fmt), Asset(self.type, state=self._state, data={}))
+                fmt = key.replace(self.type, "", 1)
+                setattr(
+                    self,
+                    self.FRIENDLY.get(fmt.lower(), fmt),
+                    Asset(self.type, state=self._state, data={}),
+                )
 
         if self.url is None:
-            self.url = getattr(self, 'large', getattr(self, 'medium', getattr(self, 'small', getattr(self, 'png', getattr(self, 'webp', self))))).url
+            self.url = getattr(
+                self,
+                "large",
+                getattr(
+                    self,
+                    "medium",
+                    getattr(
+                        self,
+                        "small",
+                        getattr(self, "png", getattr(self, "webp", self)),
+                    ),
+                ),
+            ).url
 
     def __str__(self):
         return self.url
@@ -27,7 +40,11 @@ class Asset:
         return len(str(self))
 
     def __eq__(self, other):
-        return self.url is not None and other.url is not None and self.url == other.url
+        return (
+            self.url is not None
+            and other.url is not None
+            and self.url == other.url
+        )
 
     async def read(self):
         response = await self._state.get(self.url)

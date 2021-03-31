@@ -1,6 +1,7 @@
 import colorsys
 import random
 
+
 class Colour:
     """Represents a colour in Guilded, such as in embeds or roles. This class is similar
     to a (red, green, blue) :class:`tuple`.
@@ -20,16 +21,19 @@ class Colour:
         The raw integer colour value.
     """
 
-    __slots__ = ('value',)
+    __slots__ = ("value",)
 
     def __init__(self, value):
         if not isinstance(value, int):
-            raise TypeError('Expected int parameter, received %s instead.' % value.__class__.__name__)
+            raise TypeError(
+                "Expected int parameter, received %s instead."
+                % value.__class__.__name__
+            )
 
         self.value = value
 
     def _get_byte(self, byte):
-        return (self.value >> (8 * byte)) & 0xff
+        return (self.value >> (8 * byte)) & 0xFF
 
     def __eq__(self, other):
         return isinstance(other, Colour) and self.value == other.value
@@ -38,10 +42,10 @@ class Colour:
         return not self.__eq__(other)
 
     def __str__(self):
-        return '#{:0>6x}'.format(self.value)
+        return "#{:0>6x}".format(self.value)
 
     def __repr__(self):
-        return f'<Colour value={self.value}>'
+        return f"<Colour value={self.value}>"
 
     def __hash__(self):
         return hash(self.value)
@@ -90,7 +94,7 @@ class Colour:
         Parameters
         ------------
         seed: Optional[Union[:class:`int`, :class:`str`, :class:`float`, :class:`bytes`, :class:`bytearray`]]
-            The seed to initialize the RNG with. If ``None`` is passed the default RNG is used. 
+            The seed to initialize the RNG with. If ``None`` is passed the default RNG is used.
         """
         rand = random if seed is None else random.Random(seed)
         return cls.from_hsv(rand.random(), 1, 1)
@@ -98,27 +102,27 @@ class Colour:
     @classmethod
     def teal(cls):
         """A factory method that returns a :class:`Colour` with a value of ``0x1abc9c``."""
-        return cls(0x1abc9c)
+        return cls(0x1ABC9C)
 
     @classmethod
     def dark_teal(cls):
         """A factory method that returns a :class:`Colour` with a value of ``0x11806a``."""
-        return cls(0x11806a)
+        return cls(0x11806A)
 
     @classmethod
     def green(cls):
         """A factory method that returns a :class:`Colour` with a value of ``0x2ecc71``."""
-        return cls(0x2ecc71)
+        return cls(0x2ECC71)
 
     @classmethod
     def dark_green(cls):
         """A factory method that returns a :class:`Colour` with a value of ``0x1f8b4c``."""
-        return cls(0x1f8b4c)
+        return cls(0x1F8B4C)
 
     @classmethod
     def blue(cls):
         """A factory method that returns a :class:`Colour` with a value of ``0x3498db``."""
-        return cls(0x3498db)
+        return cls(0x3498DB)
 
     @classmethod
     def dark_blue(cls):
@@ -128,90 +132,90 @@ class Colour:
     @classmethod
     def purple(cls):
         """A factory method that returns a :class:`Colour` with a value of ``0x9b59b6``."""
-        return cls(0x9b59b6)
+        return cls(0x9B59B6)
 
     @classmethod
     def dark_purple(cls):
         """A factory method that returns a :class:`Colour` with a value of ``0x71368a``."""
-        return cls(0x71368a)
+        return cls(0x71368A)
 
     @classmethod
     def magenta(cls):
         """A factory method that returns a :class:`Colour` with a value of ``0xe91e63``."""
-        return cls(0xe91e63)
+        return cls(0xE91E63)
 
     @classmethod
     def dark_magenta(cls):
         """A factory method that returns a :class:`Colour` with a value of ``0xad1457``."""
-        return cls(0xad1457)
+        return cls(0xAD1457)
 
     @classmethod
     def gold(cls):
         """A factory method that returns a :class:`Colour` with a value of ``0xf1c40f``."""
-        return cls(0xf1c40f)
+        return cls(0xF1C40F)
 
     @classmethod
     def dark_gold(cls):
         """A factory method that returns a :class:`Colour` with a value of ``0xc27c0e``."""
-        return cls(0xc27c0e)
+        return cls(0xC27C0E)
 
     @classmethod
     def orange(cls):
         """A factory method that returns a :class:`Colour` with a value of ``0xe67e22``."""
-        return cls(0xe67e22)
+        return cls(0xE67E22)
 
     @classmethod
     def dark_orange(cls):
         """A factory method that returns a :class:`Colour` with a value of ``0xa84300``."""
-        return cls(0xa84300)
+        return cls(0xA84300)
 
     @classmethod
     def red(cls):
         """A factory method that returns a :class:`Colour` with a value of ``0xe74c3c``."""
-        return cls(0xe74c3c)
+        return cls(0xE74C3C)
 
     @classmethod
     def dark_red(cls):
         """A factory method that returns a :class:`Colour` with a value of ``0x992d22``."""
-        return cls(0x992d22)
+        return cls(0x992D22)
 
     @classmethod
     def lighter_grey(cls):
         """A factory method that returns a :class:`Colour` with a value of ``0x95a5a6``."""
-        return cls(0x95a5a6)
+        return cls(0x95A5A6)
 
     lighter_gray = lighter_grey
 
     @classmethod
     def dark_grey(cls):
         """A factory method that returns a :class:`Colour` with a value of ``0x607d8b``."""
-        return cls(0x607d8b)
+        return cls(0x607D8B)
 
     dark_gray = dark_grey
 
     @classmethod
     def light_grey(cls):
         """A factory method that returns a :class:`Colour` with a value of ``0x979c9f``."""
-        return cls(0x979c9f)
+        return cls(0x979C9F)
 
     light_gray = light_grey
 
     @classmethod
     def darker_grey(cls):
         """A factory method that returns a :class:`Colour` with a value of ``0x546e7a``."""
-        return cls(0x546e7a)
+        return cls(0x546E7A)
 
     darker_gray = darker_grey
 
     @classmethod
     def gilded(cls):
         """A factory method that returns a :class:`Colour` with a value of ``0xf5c400``."""
-        return cls(0xf5c400)
+        return cls(0xF5C400)
 
     @classmethod
     def greyple(cls):
         """A factory method that returns a :class:`Colour` with a value of ``0x99aab5``."""
-        return cls(0x99aab5)
+        return cls(0x99AAB5)
 
     @classmethod
     def dark_theme(cls):
@@ -223,7 +227,7 @@ class Colour:
     def dark_theme_embed(cls):
         """A factory method that returns a :class:`Colour` with a value of ``0x32343d``.
         This will appear to blend with embed backgrounds."""
-        return cls(0x32343d)
+        return cls(0x32343D)
 
     @classmethod
     def black(cls):
@@ -236,5 +240,6 @@ class Colour:
         return cls(0x36363D)
 
     gray = grey
+
 
 Color = Colour

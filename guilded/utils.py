@@ -1,42 +1,68 @@
+import asyncio
+import datetime
+import re
 from operator import attrgetter
 from uuid import uuid1
-import datetime
-import asyncio
-import re
 
 from .colour import Colour
 
 GUILDED_EPOCH_DATETIME = datetime.datetime(2016, 1, 1)
-GUILDED_EPOCH_ISO8601 = GUILDED_EPOCH_DATETIME.isoformat() + 'Z'
+GUILDED_EPOCH_ISO8601 = GUILDED_EPOCH_DATETIME.isoformat() + "Z"
 GUILDED_EPOCH = int(GUILDED_EPOCH_DATETIME.timestamp())
 
-valid_image_extensions = ['png', 'webp', 'jpg', 'jpeg', 'gif', 'jif', 'tif', 'tiff', 'apng', 'bmp', 'svg']
-valid_video_extensions = ['mp4', 'mpeg', 'mpg', 'mov', 'avi', 'wmv', 'qt', 'webm']
+valid_image_extensions = [
+    "png",
+    "webp",
+    "jpg",
+    "jpeg",
+    "gif",
+    "jif",
+    "tif",
+    "tiff",
+    "apng",
+    "bmp",
+    "svg",
+]
+valid_video_extensions = [
+    "mp4",
+    "mpeg",
+    "mpg",
+    "mov",
+    "avi",
+    "wmv",
+    "qt",
+    "webm",
+]
+
 
 def ISO8601(string: str):
     if string is None:
         return None
 
     try:
-        return datetime.datetime.strptime(string, '%Y-%m-%dT%H:%M:%S.%fZ')
-    except:
+        return datetime.datetime.strptime(string, "%Y-%m-%dT%H:%M:%S.%fZ")
+    except Exception:
         try:
-            return datetime.datetime.strptime(string, '%Y-%m-%dT%H:%M:%SZ')
-        except:
+            return datetime.datetime.strptime(string, "%Y-%m-%dT%H:%M:%SZ")
+        except Exception:
             pass
-        raise TypeError(f'{string} is not a valid ISO8601 datetime.')
+        raise TypeError(f"{string} is not a valid ISO8601 datetime.")
+
 
 def hyperlink(link: str, *, title=None):
-    '''A helper function to make links clickable when sent into chat.'''
-    return f'[{title or link}]({link})'
+    """A helper function to make links clickable when sent into chat."""
+    return f"[{title or link}]({link})"
+
 
 def link(link: str, *, title=None):
-    '''Alias of :func:hyperlink.'''
+    """Alias of :func:hyperlink."""
     return hyperlink(link, title=title)
 
+
 def new_uuid():
-    '''Generate a new, compliant UUID.'''
+    """Generate a new, compliant UUID."""
     return str(uuid1())
+
 
 def get(item, **attributes):
     # global -> local
@@ -46,14 +72,14 @@ def get(item, **attributes):
     # Special case the single element call
     if len(attributes) == 1:
         k, v = attributes.popitem()
-        pred = attrget(k.replace('__', '.'))
+        pred = attrget(k.replace("__", "."))
         for elem in item:
             if pred(elem) == v:
                 return elem
         return None
 
     converted = [
-        (attrget(attr.replace('__', '.')), value)
+        (attrget(attr.replace("__", ".")), value)
         for attr, value in attributes.items()
     ]
 
@@ -61,6 +87,7 @@ def get(item, **attributes):
         if _all(pred(elem) == value for pred, value in converted):
             return elem
     return None
+
 
 async def sleep_until(when, result=None):
     if when.tzinfo is None:
@@ -72,12 +99,20 @@ async def sleep_until(when, result=None):
         delta -= 3456000
     return await asyncio.sleep(max(delta, 0), result)
 
-_MARKDOWN_ESCAPE_SUBREGEX = '|'.join(r'\{0}(?=([\s\S]*((?<!\{0})\{0})))'.format(c)
-                                     for c in ('*', '`', '_', '~', '|'))
 
-_MARKDOWN_ESCAPE_COMMON = r'^>(?:>>)?\s|\[.+\]\(.+\)'
+_MARKDOWN_ESCAPE_SUBREGEX = "|".join(
+    r"\{0}(?=([\s\S]*((?<!\{0})\{0})))".format(c)
+    for c in ("*", "`", "_", "~", "|")
+)
 
-_MARKDOWN_ESCAPE_REGEX = re.compile(r'(?P<markdown>%s|%s)' % (_MARKDOWN_ESCAPE_SUBREGEX, _MARKDOWN_ESCAPE_COMMON), re.MULTILINE)
+_MARKDOWN_ESCAPE_COMMON = r"^>(?:>>)?\s|\[.+\]\(.+\)"
+
+_MARKDOWN_ESCAPE_REGEX = re.compile(
+    r"(?P<markdown>%s|%s)"
+    % (_MARKDOWN_ESCAPE_SUBREGEX, _MARKDOWN_ESCAPE_COMMON),
+    re.MULTILINE,
+)
+
 
 def escape_markdown(text, *, as_needed=False, ignore_links=True):
     r"""A helper function that escapes markdown.
@@ -102,24 +137,26 @@ def escape_markdown(text, *, as_needed=False, ignore_links=True):
         The text with the markdown special characters escaped with a slash.
     """
     if not as_needed:
-        url_regex = r'(?P<url><[^: >]+:\/[^ >]+>|(?:https?|steam):\/\/[^\s<]+[^<.,:;\"\'\]\s])'
+        url_regex = r"(?P<url><[^: >]+:\/[^ >]+>|(?:https?|steam):\/\/[^\s<]+[^<.,:;\"\'\]\s])"
+
         def replacement(match):
             groupdict = match.groupdict()
-            is_url = groupdict.get('url')
+            is_url = groupdict.get("url")
             if is_url:
                 return is_url
-            return '\\' + groupdict['markdown']
+            return "\\" + groupdict["markdown"]
 
-        regex = r'(?P<markdown>[_\\~|\*`]|%s)' % _MARKDOWN_ESCAPE_COMMON
+        regex = r"(?P<markdown>[_\\~|\*`]|%s)" % _MARKDOWN_ESCAPE_COMMON
         if ignore_links:
-            regex = '(?:%s|%s)' % (url_regex, regex)
+            regex = "(?:%s|%s)" % (url_regex, regex)
         return re.sub(regex, replacement, text, 0, re.MULTILINE)
     else:
-        text = re.sub(r'\\', r'\\\\', text)
-        return _MARKDOWN_ESCAPE_REGEX.sub(r'\\\1', text)
+        text = re.sub(r"\\", r"\\\\", text)
+        return _MARKDOWN_ESCAPE_REGEX.sub(r"\\\1", text)
+
 
 def parse_hex_number(argument):
-    arg = ''.join(i * 2 for i in argument) if len(argument) == 3 else argument
+    arg = "".join(i * 2 for i in argument) if len(argument) == 3 else argument
     try:
         value = int(arg, base=16)
         if not (0 <= value <= 0xFFFFFF):
