@@ -41,10 +41,10 @@ def ISO8601(string: str):
 
     try:
         return datetime.datetime.strptime(string, "%Y-%m-%dT%H:%M:%S.%fZ")
-    except Exception:
+    except ValueError:
         try:
             return datetime.datetime.strptime(string, "%Y-%m-%dT%H:%M:%SZ")
-        except Exception:
+        except ValueError:
             pass
         raise TypeError(f"{string} is not a valid ISO8601 datetime.")
 

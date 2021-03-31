@@ -9,7 +9,7 @@ import traceback
 
 import aiohttp
 
-from . import GuildedException
+from .errors import GuildedException
 from .message import Message
 from .user import Member
 

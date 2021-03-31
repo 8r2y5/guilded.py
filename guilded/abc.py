@@ -1,10 +1,13 @@
 import abc
+import logging
 
 from .activity import Activity
 from .asset import Asset
 from .file import MediaType
 from .message import Message
 from .utils import GUILDED_EPOCH_ISO8601, ISO8601
+
+logger = logging.getLogger(__name__)
 
 
 class Messageable(metaclass=abc.ABCMeta):
@@ -19,20 +22,28 @@ class Messageable(metaclass=abc.ABCMeta):
         content: str = None,
         *,
         embed=None,
-        embeds: list = [],
+        embeds: list = None,
         file=None,
-        files: list = [],
+        files: list = None,
     ):
         """Send to a Guilded channel."""
         payload = {}
         if content:
             payload["content"] = content
+
         if embed:
             embeds = [embed, *embeds]
+        else:
+            embeds = []
+
         if embeds:
             payload["embeds"] = [embed.to_dict() for embed in embeds]
+
         if file:
             files = [file, *files]
+        else:
+            files = []
+
         if files:
             pl_files = []
             for file in files:
@@ -60,7 +71,7 @@ class Messageable(metaclass=abc.ABCMeta):
                     Message(state=self._state, channel=self, data=message)
                 )
             except Exception:
-                pass
+                logger.exception("Could add messages")
 
         return messages
 
