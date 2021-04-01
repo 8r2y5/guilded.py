@@ -36,8 +36,6 @@ class Messageable(metaclass=abc.ABCMeta):
 
         if embed:
             embeds = [embed, *embeds]
-        else:
-            embeds = []
 
         if embeds:
             payload["embeds"] = [embed.to_dict() for embed in embeds]
@@ -47,8 +45,6 @@ class Messageable(metaclass=abc.ABCMeta):
 
         if file:
             files = [file, *files]
-        else:
-            files = []
 
         if files:
             pl_files = []
