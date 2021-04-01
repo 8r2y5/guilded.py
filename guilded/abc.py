@@ -31,23 +31,23 @@ class Messageable(metaclass=abc.ABCMeta):
         if content:
             payload["content"] = content
 
+        if embeds is None:
+            embeds = []
+
         if embed:
             embeds = [embed, *embeds]
         else:
             embeds = []
 
-        if embeds is None:
-            embeds = []
-
         if embeds:
             payload["embeds"] = [embed.to_dict() for embed in embeds]
+
+        if files is None:
+            files = []
 
         if file:
             files = [file, *files]
         else:
-            files = []
-
-        if files is None:
             files = []
 
         if files:

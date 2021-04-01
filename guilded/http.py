@@ -162,8 +162,14 @@ class HTTPClient:
         )
 
     def send_message(
-        self, channel_id: str, *, content=None, embeds=[], files=[]
+        self, channel_id: str, *, content=None, embeds=None, files=None
     ):
+        if embeds is None:
+            embeds = []
+
+        if files is None:
+            files = []
+
         route = Route("POST", f"/channels/{channel_id}/messages")
         payload = {
             "messageId": utils.new_uuid(),
@@ -431,12 +437,17 @@ class HTTPClient:
         icon_url: str = None,
         game_id: int = None,
         membership_role_id: int = None,
-        additional_membership_role_ids: list = [],
+        additional_membership_role_ids: list = None,
         emoji_id: int = None,
         public: bool = True,
         base: bool = False,
-        users: list = [],
+        users: list = None,
     ):
+        if additional_membership_role_ids is None:
+            additional_membership_role_ids = []
+
+        if users is None:
+            users = []
         return self.request(
             Route("POST", f"/teams{team_id}/groups"),
             json={
@@ -463,12 +474,17 @@ class HTTPClient:
         icon_url: str = None,
         game_id: int = None,
         membership_role_id: int = None,
-        additional_membership_role_ids: list = [],
+        additional_membership_role_ids: list = None,
         emoji_id: int = None,
         public: bool = True,
         base: bool = False,
-        users: list = [],
+        users: list = None,
     ):
+        if additional_membership_role_ids is None:
+            additional_membership_role_ids = []
+        if users is None:
+            users = []
+
         return self.request(
             Route("PUT", f"/teams{team_id}/groups/{group_id}"),
             json={

@@ -184,9 +184,9 @@ class Message:
         *,
         content: str = None,
         embed=None,
-        embeds: list = [],
+        embeds: list = None,
         file=None,
-        files: list = [],
+        files: list = None,
     ):
         """Send to a Guilded channel."""
         payload = {
