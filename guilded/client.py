@@ -202,10 +202,11 @@ class Client:
                 while True and ws is not None and reconnect_tried <= 5:
                     try:
                         await ws.poll_event()
-                    except WebSocketClosure as exc:
+                    except WebSocketClosure:
                         code = ws._close_code or ws.socket.close_code
                         log.info(
-                            f"Websocket closed with code {code}, attempting to reconnect..."
+                            "Websocket closed with code %s, attempting to reconnect...",
+                            code,
                         )
                         ws = await GuildedWebSocket.build(
                             self, loop=self.loop, teamId=teamId
@@ -311,8 +312,7 @@ class Client:
         =======
         :class:Team - the team that you joined"""
         await self.http.join_team(id)
-        team = await self.http.get_team(id)
-        return
+        await self.http.get_team(id)
 
     async def fetch_team(self, id: str):
         """Fetch a team from the API."""

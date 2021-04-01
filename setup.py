@@ -37,6 +37,7 @@ setuptools.setup(
             "isort",
             "flake8",
             "pre-commit",
+            "ipdb",
         ]
     },
 )
