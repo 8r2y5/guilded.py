@@ -65,7 +65,10 @@ class Message:
         return self.content
 
     def __eq__(self, other):
-        return self.id == other.id
+        try:
+            return self.id == other.id
+        except:
+            return False
 
     @property
     def jump_url(self):
@@ -81,8 +84,10 @@ class Message:
         return self.team
 
     def _get_full_content(self):
-        # if-elsing till the day i die (or until this lib can update to 3.10)
         """Get the content of a message in an easy to use single string. Attempts to append mentions to the Message as well. Intended for internal use only."""
+        # if-elsing till the day i die
+        # (or until this lib can update to 3.10)
+        # (or until i decide to rewrite this to have a handler for each node type)
         try:
             nodes = self._raw.get("message", self._raw)["content"]["document"][
                 "nodes"
@@ -114,7 +119,7 @@ class Message:
                                     elif mark["type"] == "spoiler":
                                         to_mark = "||" + to_mark + "||"
                                     else:
-                                        to_mark = to_mark
+                                        pass
                                 content += to_mark.format(
                                     unmarked_content=str(leaf["text"])
                                 )
@@ -145,7 +150,7 @@ class Message:
                                 # }))
                         if element["type"] == "reaction":
                             rtext = element["nodes"][0]["leaves"][0]["text"]
-                            content += rtext
+                            content += str(rtext)
                         if element["type"] == "link":
                             l1 = element["nodes"][0]["leaves"][0]["text"]
                             l2 = element["data"]["href"]
@@ -165,7 +170,7 @@ class Message:
                     self.embeds.append(Embed.from_dict(msg_embed))
             if type == "block-quote-container":
                 text = str(node["nodes"][0]["nodes"][0]["leaves"][0]["text"])
-                content += "> " + text
+                content += "\n> {text}\n"
 
         return content
 

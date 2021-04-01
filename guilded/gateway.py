@@ -9,6 +9,7 @@ import traceback
 
 import aiohttp
 
+from .channel import Thread
 from .errors import GuildedException
 from .message import Message
 from .user import Member
@@ -175,18 +176,6 @@ class WebSocketEventParsers:
             except:
                 channel = None
 
-        if createdBy:
-            if channel:
-                try:
-                    author = await channel.team.getch_member(createdBy)
-                except:
-                    author = None
-            else:
-                try:
-                    author = await self.client.getch_user(createdBy)
-                except:
-                    author = None
-
         if teamId:
             if channel:
                 team = channel.team
@@ -195,6 +184,29 @@ class WebSocketEventParsers:
                     team = await self.client.getch_team(teamId)
                 except:
                     team = None
+
+        if createdBy:
+            if channel:
+                try:
+                    author = await channel.team.getch_member(createdBy)
+                except:
+                    try:
+                        await self.client.getch_user(createdBy)
+                    except:
+                        author = None
+            elif team:
+                try:
+                    author = await team.getch_member(createdBy)
+                except:
+                    try:
+                        await self.client.getch_user(createdBy)
+                    except:
+                        author = None
+            else:
+                try:
+                    author = await self.client.getch_user(createdBy)
+                except:
+                    author = None
 
         message = Message(
             state=self.client.http,
@@ -270,7 +282,6 @@ class WebSocketEventParsers:
             data=data,
         )
         self._state.add_to_message_cache(after)
-
         self.client.dispatch("message_edit", before, after)
 
     async def TeamXpSet(self, data):
@@ -308,8 +319,9 @@ class WebSocketEventParsers:
 
     async def teamRolesUpdates(self, data):
         # yes, this event name is camelcased
-        team = self.client.get_team(data["teamId"])
-        if team is None:
+        try:
+            team = await self.client.getch_team(data["teamId"])
+        except:
             return
 
         befores_afters = []
@@ -325,6 +337,15 @@ class WebSocketEventParsers:
 
         for b, a in befores_afters:
             self.client.dispatch("member_update", b, a)
+
+    async def TemporalChannelCreated(self, data):
+        if data.get("channelType", "").lower() == "team":
+            try:
+                team = await self.client.getch_team(data["teamId"])
+            except:
+                return
+
+            thread = Thread(state=self._state, data=data.get("channel", data))
 
 
 class Heartbeater(threading.Thread):
