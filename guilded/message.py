@@ -67,7 +67,7 @@ class Message:
     def __eq__(self, other):
         try:
             return self.id == other.id
-        except:
+        except AttributeError:
             return False
 
     @property
@@ -170,7 +170,7 @@ class Message:
                     self.embeds.append(Embed.from_dict(msg_embed))
             if type == "block-quote-container":
                 text = str(node["nodes"][0]["nodes"][0]["leaves"][0]["text"])
-                content += "\n> {text}\n"
+                content = f"{content}\n> {text}\n"
 
         return content
 

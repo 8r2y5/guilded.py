@@ -125,8 +125,7 @@ class User(metaclass=abc.ABCMeta):
     def __eq__(self, other):
         try:
             return self.id == other.id
-        except Exception:
-            logger.exception("Other: %r", other)
+        except AttributeError:
             return False
 
     @property
@@ -196,8 +195,7 @@ class TeamChannel(Messageable):
     def __eq__(self, other):
         try:
             return self.id == other.id
-        except Exception:
-            logger.exception("Other: %r", other)
+        except AttributeError:
             return False
 
     async def delete(self):
