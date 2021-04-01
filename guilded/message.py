@@ -109,15 +109,15 @@ class Message:
                                 marks = leaf["marks"]
                                 for mark in marks:
                                     if mark["type"] == "bold":
-                                        to_mark = "**" + to_mark + "**"
+                                        to_mark = f"**{to_mark}**"
                                     elif mark["type"] == "italic":
-                                        to_mark = "*" + to_mark + "*"
+                                        to_mark = f"*{to_mark}*"
                                     elif mark["type"] == "underline":
-                                        to_mark = "__" + to_mark + "__"
+                                        to_mark = f"__{to_mark}__"
                                     elif mark["type"] == "strikethrough":
-                                        to_mark = "~~" + to_mark + "~~"
+                                        to_mark = f"~~{to_mark}~~"
                                     elif mark["type"] == "spoiler":
-                                        to_mark = "||" + to_mark + "||"
+                                        to_mark = f"||{to_mark}||"
                                     else:
                                         pass
                                 content += to_mark.format(
@@ -150,14 +150,14 @@ class Message:
                                 # }))
                         if element["type"] == "reaction":
                             rtext = element["nodes"][0]["leaves"][0]["text"]
-                            content += str(rtext)
+                            content = f"{content}{rtext}"
                         if element["type"] == "link":
                             l1 = element["nodes"][0]["leaves"][0]["text"]
                             l2 = element["data"]["href"]
                             content += f"[{l1}]({l2})"
                         if element["type"] == "channel":
                             channel = element["data"]["channel"]
-                            content += f'<#{channel.get("id")}>'
+                            content = f'{content}<#{channel.get("id")}>'
                             # self.channel_mentions.append(TeamChannel(state=self._state, group=None, team=self.team, data={
                             #    'name': channel.get('name'),
                             #    'id': channel.get('id')
