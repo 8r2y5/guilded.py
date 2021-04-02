@@ -219,7 +219,7 @@ class Message:
 
             payload["files"] = pl_files
 
-        return await self._state.edit_message(self._channel_id, **payload)
+        return await self._state.edit_message(self.channel_id, **payload)
 
 
 class PartialMessage:
