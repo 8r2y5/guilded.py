@@ -136,15 +136,20 @@ class Client:
             raise TypeError("Event must be a coroutine.")
 
         setattr(self, coro.__name__, coro)
-        self._listeners[coro.__name__] = coro
+        try:
+            self._listeners[coro.__name__].append(coro)
+        except KeyError:
+            self._listeners[coro.__name__] = [coro]
         return coro
 
     def dispatch(self, event_name, *args, **kwargs):
         """Dispatch a registered event."""
-        coro = self._listeners.get(f"on_{event_name}")
-        if not coro:
+        coros = self._listeners.get(f"on_{event_name}")
+        if not coros:
             return
-        self.loop.create_task(coro(*args, **kwargs))
+        self.loop.create_task(
+            asyncio.gather(*[coro(*args, **kwargs) for coro in coros])
+        )
 
     async def start(self, email, password, *, reconnect=True):
         """Login and connect to Guilded using a user account email and password."""
