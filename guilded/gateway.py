@@ -62,7 +62,7 @@ class GuildedWebSocket:
         try:
             socket = await client.http.ws_connect(**gateway_args)
         except aiohttp.client_exceptions.WSServerHandshakeError as exc:
-            log.error(f"Failed to connect: {exc}")
+            log.exception(f"Failed to connect")
             return exc
         else:
             log.info("Connected")

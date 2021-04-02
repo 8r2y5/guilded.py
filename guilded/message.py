@@ -188,6 +188,11 @@ class Message:
         file=None,
         files: list = None,
     ):
+        if embeds is None:
+            embeds = []
+        if files is None:
+            files = []
+
         """Send to a Guilded channel."""
         payload = {
             "old_content": self.content,

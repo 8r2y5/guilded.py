@@ -1,7 +1,10 @@
 import datetime
+import logging
 
 from . import utils
 from .colour import Colour
+
+logger = logging.getLogger(__name__)
 
 
 class _EmptyEmbed:
@@ -159,6 +162,8 @@ class Embed:
             self._colour = Colour(value=data["color"])
         except KeyError:
             pass
+        except TypeError:
+            logger.exception("Could not create color %s", data)
 
         try:
             self._timestamp = utils.ISO8601(data["timestamp"])
