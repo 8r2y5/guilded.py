@@ -9,7 +9,7 @@ import traceback
 
 import aiohttp
 
-from .channel import Thread
+from .channel import ChatChannel, Thread
 from .errors import GuildedException
 from .message import Message
 from .user import Member
@@ -346,6 +346,22 @@ class WebSocketEventParsers:
                 return
 
             thread = Thread(state=self._state, data=data.get("channel", data))
+
+    async def TeamChannelCreated(self, data):
+        try:
+            team = await self.client.getch_team(data["teamId"])
+        except Exception:
+            log.exception("Unable to get team on TeamChannelCreated")
+            return
+
+        team_channel = ChatChannel(
+            state=self._state,
+            team=team,
+            group=None,  # TODO: git gut group
+            data=data.get("channel", data),
+        )
+        self._state.add_to_team_channel_cache(team_channel)
+        self.client.dispatch("channel_create", team_channel)
 
 
 class Heartbeater(threading.Thread):
